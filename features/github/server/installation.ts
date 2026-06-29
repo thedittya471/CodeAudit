@@ -78,6 +78,26 @@ export async function deleteInstallation(userId: string) {
     await prisma.githubInstallation.delete({ where: { userId } });
 }
 
+/**
+ * Uninstalls the GitHub App from the account on GitHub's side.
+ * Safe to call even if the installation was already removed on GitHub
+ * (a 404 is treated as already-gone).
+ */
+export async function uninstallGithubApp(installationId: number) {
+    const app = getGithubApp();
+
+    try {
+        await app.octokit.request("DELETE /app/installations/{installation_id}", {
+            installation_id: installationId,
+        });
+    } catch (error: any) {
+        if (error?.status === 404) {
+            return;
+        }
+        throw error;
+    }
+}
+
 export async function getUserIdByInstallationId(installationId: number) {
     const installation = await prisma.githubInstallation.findFirst({
         where: { installationId },

@@ -91,10 +91,28 @@ export function buildRepoNamespace(repoFullName: string) {
     const octokit = await app.getInstallationOctokit(installationId);
     const [owner, repo] = repoFullName.split("/");
   
-    const { data: tree } = await octokit.request(
-      "GET /repos/{owner}/{repo}/git/trees/{tree_sha}",
-      { owner, repo, tree_sha: branch, recursive: "1" }
-    );
+    let tree;
+    try {
+      const response = await octokit.request(
+        "GET /repos/{owner}/{repo}/git/trees/{tree_sha}",
+        { owner, repo, tree_sha: branch, recursive: "1" }
+      );
+      tree = response.data;
+    } catch (error: any) {
+      // GitHub returns 404 (not 403) when the installation token lacks the
+      // "Contents: read" permission. The accepted-permissions header tells us
+      // exactly what the endpoint requires vs. what the token was granted.
+      console.error("[repo-sync] get-tree failed", {
+        owner,
+        repo,
+        branch,
+        status: error?.status,
+        message: error?.message,
+        acceptedPermissions:
+          error?.response?.headers?.["x-accepted-github-permissions"],
+      });
+      throw error;
+    }
   
     const entries = tree.tree.filter(isIndexableFile).slice(0, MAX_FILES);
     const files: RepoFile[] = [];

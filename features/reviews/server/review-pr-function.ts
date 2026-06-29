@@ -2,7 +2,8 @@ import { inngest } from "@/features/inngest/client";
 import { prisma } from "@/lib/db";
 import { formatPrFilesForReview, getPullRequestFiles } from "./pr-files";
 import { generateReview } from "./generate-review";
-import { postPrComment } from "./post-pr-comment";
+import { postPrComment, updatePrComment, buildReviewBody, REVIEW_IN_PROGRESS_BODY, REVIEW_MARKER } from "./post-pr-comment";
+import { startCheckRun, completeCheckRun } from "./check-run";
 import { chunkPrFiles } from "../utils/chunk-code";
 import { buildPrNamespace, saveChunksToPinecone, searchPrContext } from "./vector";
 import { buildRepoNamespace } from "@/features/repo-sync/server/repo-sync";
@@ -19,7 +20,28 @@ export const reviewPullRequest = inngest.createFunction(
           data: { status: "processing" },
         });
       });
-  
+
+      // Post a visible placeholder immediately so the author knows a review is
+      // underway and shouldn't merge yet. We update this same comment later.
+      const reviewCommentId = await step.run("post-in-progress-comment", async () => {
+        return postPrComment(
+          pullRequest.installationId,
+          pullRequest.repoFullName,
+          pullRequest.prNumber,
+          REVIEW_IN_PROGRESS_BODY
+        );
+      });
+
+      // Start an in-progress check run so the reviewer appears (and spins) in
+      // the PR "Checks" section until the review completes.
+      const checkRunId = await step.run("start-check-run", async () => {
+        return startCheckRun(
+          pullRequest.installationId,
+          pullRequest.repoFullName,
+          pullRequest.headSha
+        );
+      });
+
       const chunks = await step.run("breakdown-code", async () => {
         const files = await getPullRequestFiles(
           pullRequest.installationId,
@@ -38,7 +60,29 @@ export const reviewPullRequest = inngest.createFunction(
             data: { status: "reviewed" },
           });
         });
-  
+
+        await step.run("update-comment-no-code", async () => {
+          await updatePrComment(
+            pullRequest.installationId,
+            pullRequest.repoFullName,
+            reviewCommentId,
+            `${REVIEW_MARKER}\n## 🔍 AI Code Review\n\n✅ No reviewable code changes were found in this pull request.`
+          );
+        });
+
+        await step.run("complete-check-run-no-code", async () => {
+          await completeCheckRun(
+            pullRequest.installationId,
+            pullRequest.repoFullName,
+            checkRunId,
+            {
+              conclusion: "neutral",
+              title: "No code to review",
+              summary: "No reviewable code changes were found in this pull request.",
+            }
+          );
+        });
+
         return { pullRequestId, status: "reviewed", reason: "no code to review" };
       }
   
@@ -85,11 +129,24 @@ export const reviewPullRequest = inngest.createFunction(
       });
   
       await step.run("post-pr-comment", async () => {
-        await postPrComment(
+        await updatePrComment(
           pullRequest.installationId,
           pullRequest.repoFullName,
-          pullRequest.prNumber,
-          review
+          reviewCommentId,
+          buildReviewBody(review)
+        );
+      });
+
+      await step.run("complete-check-run", async () => {
+        await completeCheckRun(
+          pullRequest.installationId,
+          pullRequest.repoFullName,
+          checkRunId,
+          {
+            conclusion: "success",
+            title: "Review complete",
+            summary: review,
+          }
         );
       });
   
