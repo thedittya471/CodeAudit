@@ -17,7 +17,12 @@ function buildChunkId(prNumber: number, filePath: string, part: number) {
       for (let start = 0; start < lines.length; start += MAX_CHUNK_LINES) {
         const part = start / MAX_CHUNK_LINES;
         const text = lines.slice(start, start + MAX_CHUNK_LINES).join("\n");
-  
+
+        // The embedding model rejects empty input — skip blank/whitespace chunks.
+        if (!text.trim()) {
+          continue;
+        }
+
         chunks.push({
           id: buildChunkId(prNumber, file.filePath, part),
           filePath: file.filePath,

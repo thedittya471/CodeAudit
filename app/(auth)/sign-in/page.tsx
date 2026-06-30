@@ -1,68 +1,36 @@
-import React from 'react'
-import Image from "next/image"
-import type { Metadata } from 'next'
-import {
-    Card,
-    CardContent,
-    CardDescription,
-    CardHeader,
-    CardTitle,
-} from "@/components/ui/card"
-import {
-    Field,
-    FieldDescription,
-    FieldGroup,
-    FieldSet
-} from "@/components/ui/field"
-import { Fieldset } from '@base-ui/react'
-import { GithubSignInForm } from '@/features/auth/components/github-sign-in-form'
-
+import type { Metadata } from "next";
+import { AuthForm } from "@/features/auth/components/auth-form";
 
 export const metadata: Metadata = {
-    title: "Sign in",
-    description: "Sign in to CodeAudit with your Github account."
+  title: "Sign in · CodeAudit",
+  description: "Sign in to CodeAudit to review and manage your pull requests.",
+};
+
+type SignInPageProps = {
+  searchParams: Promise<{ callbackUrl?: string }>;
+};
+
+export default async function SignInPage({ searchParams }: SignInPageProps) {
+  const { callbackUrl } = await searchParams;
+
+  return (
+    <div className="border border-white/10 bg-[#0a0a0c]">
+      <div className="flex items-center justify-between border-b border-white/10 px-6 py-3 font-mono text-[11px] uppercase tracking-[0.2em] text-[#75757e]">
+        <span className="flex items-center gap-2 text-[#9a9aa3]">
+          <span className="size-1.5 rounded-full bg-[#ff4d00]" />
+          Access
+        </span>
+        <span>SIGN IN</span>
+      </div>
+      <div className="px-6 py-8 sm:px-8">
+        <h1 className="text-2xl font-semibold tracking-tight text-white">Welcome back</h1>
+        <p className="mt-2 text-sm text-[#9a9aa3]">
+          Sign in to continue reviewing your code.
+        </p>
+        <div className="mt-7">
+          <AuthForm mode="sign-in" callbackUrl={callbackUrl} />
+        </div>
+      </div>
+    </div>
+  );
 }
-
-type SignInPagePros = {
-    searchParams: Promise<{ callbackUrl?: string }>
-}
-
-const SignInPage = async ({ searchParams }: SignInPagePros) => {
-
-    const { callbackUrl } = await searchParams
-
-    return (
-        <Card className='border-border/80 shadow-sm'>
-            <CardHeader className='items-center text-center'>
-                <div className='mb-6 flex justify-center pt-2'>
-                    <Image
-                        src="/logo.svg"
-                        alt="CodeAudit Code Reviewer"
-                        width={172}
-                        height={172}
-                        priority
-                        className='text-foreground'
-                    />
-                </div>
-                <CardTitle className='text-base'>Welcome back</CardTitle>
-                <CardDescription>
-                    Sign in with Github to review and manage your code.
-                </CardDescription>
-            </CardHeader>
-            <CardContent>
-                <FieldSet>
-                    <FieldGroup>
-                        <Field>
-                            <GithubSignInForm callbackUrl={callbackUrl} />
-                            <FieldDescription className='text-center'>
-                                We only request the permissions needed to identify your account. You can revode access anytime from Github settings.
-                            </FieldDescription>
-                        </Field>
-                    </FieldGroup>
-                </FieldSet>
-            </CardContent>
-        </Card>
-    )
-}
-
-export default SignInPage

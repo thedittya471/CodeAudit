@@ -27,5 +27,5 @@ export async function disconnectGithubApp() {
     }
 
     await deleteInstallation(session.user.id);
-    redirect(DASHBOARD_ROUTES.github);
+    redirect(DASHBOARD_ROUTES.settings);
   }

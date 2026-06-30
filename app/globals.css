@@ -10,6 +10,7 @@
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-mono);
   --font-heading: var(--font-mono);
+  --font-display: var(--font-display);
   --color-sidebar-ring: var(--sidebar-ring);
   --color-sidebar-border: var(--sidebar-border);
   --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
@@ -49,38 +50,38 @@
 }
 
 :root {
-  --background: oklch(1 0 0);
-  --foreground: oklch(0.148 0.004 228.8);
+  --background: oklch(0.985 0.004 75);
+  --foreground: oklch(0.205 0.01 60);
   --card: oklch(1 0 0);
-  --card-foreground: oklch(0.148 0.004 228.8);
+  --card-foreground: oklch(0.205 0.01 60);
   --popover: oklch(1 0 0);
-  --popover-foreground: oklch(0.148 0.004 228.8);
-  --primary: oklch(0.457 0.24 277.023);
-  --primary-foreground: oklch(0.962 0.018 272.314);
-  --secondary: oklch(0.967 0.001 286.375);
-  --secondary-foreground: oklch(0.21 0.006 285.885);
-  --muted: oklch(0.963 0.002 197.1);
-  --muted-foreground: oklch(0.56 0.021 213.5);
-  --accent: oklch(0.963 0.002 197.1);
-  --accent-foreground: oklch(0.218 0.008 223.9);
+  --popover-foreground: oklch(0.205 0.01 60);
+  --primary: oklch(0.646 0.229 38);
+  --primary-foreground: oklch(0.18 0.025 40);
+  --secondary: oklch(0.962 0.004 75);
+  --secondary-foreground: oklch(0.25 0.01 60);
+  --muted: oklch(0.965 0.004 75);
+  --muted-foreground: oklch(0.505 0.012 65);
+  --accent: oklch(0.955 0.008 60);
+  --accent-foreground: oklch(0.25 0.01 60);
   --destructive: oklch(0.577 0.245 27.325);
-  --border: oklch(0.925 0.005 214.3);
-  --input: oklch(0.925 0.005 214.3);
-  --ring: oklch(0.723 0.014 214.4);
+  --border: oklch(0.9 0.006 70);
+  --input: oklch(0.9 0.006 70);
+  --ring: oklch(0.646 0.229 38);
   --chart-1: oklch(0.905 0.182 98.111);
   --chart-2: oklch(0.795 0.184 86.047);
   --chart-3: oklch(0.681 0.162 75.834);
   --chart-4: oklch(0.554 0.135 66.442);
   --chart-5: oklch(0.476 0.114 61.907);
   --radius: 0;
-  --sidebar: oklch(0.987 0.002 197.1);
-  --sidebar-foreground: oklch(0.148 0.004 228.8);
-  --sidebar-primary: oklch(0.511 0.262 276.966);
-  --sidebar-primary-foreground: oklch(0.962 0.018 272.314);
-  --sidebar-accent: oklch(0.963 0.002 197.1);
-  --sidebar-accent-foreground: oklch(0.218 0.008 223.9);
-  --sidebar-border: oklch(0.925 0.005 214.3);
-  --sidebar-ring: oklch(0.723 0.014 214.4);
+  --sidebar: oklch(0.975 0.004 75);
+  --sidebar-foreground: oklch(0.205 0.01 60);
+  --sidebar-primary: oklch(0.646 0.229 38);
+  --sidebar-primary-foreground: oklch(0.18 0.025 40);
+  --sidebar-accent: oklch(0.95 0.008 60);
+  --sidebar-accent-foreground: oklch(0.25 0.01 60);
+  --sidebar-border: oklch(0.9 0.006 70);
+  --sidebar-ring: oklch(0.646 0.229 38);
 }
 
 .dark {
@@ -90,8 +91,8 @@
   --card-foreground: oklch(0.987 0.002 197.1);
   --popover: oklch(0.218 0.008 223.9);
   --popover-foreground: oklch(0.987 0.002 197.1);
-  --primary: oklch(0.398 0.195 277.366);
-  --primary-foreground: oklch(0.962 0.018 272.314);
+  --primary: oklch(0.646 0.229 38);
+  --primary-foreground: oklch(0.18 0.025 40);
   --secondary: oklch(0.274 0.006 286.033);
   --secondary-foreground: oklch(0.985 0 0);
   --muted: oklch(0.275 0.011 216.9);
@@ -101,7 +102,7 @@
   --destructive: oklch(0.704 0.191 22.216);
   --border: oklch(1 0 0 / 10%);
   --input: oklch(1 0 0 / 15%);
-  --ring: oklch(0.56 0.021 213.5);
+  --ring: oklch(0.646 0.229 38);
   --chart-1: oklch(0.905 0.182 98.111);
   --chart-2: oklch(0.795 0.184 86.047);
   --chart-3: oklch(0.681 0.162 75.834);
@@ -109,8 +110,8 @@
   --chart-5: oklch(0.476 0.114 61.907);
   --sidebar: oklch(0.218 0.008 223.9);
   --sidebar-foreground: oklch(0.987 0.002 197.1);
-  --sidebar-primary: oklch(0.585 0.233 277.117);
-  --sidebar-primary-foreground: oklch(0.962 0.018 272.314);
+  --sidebar-primary: oklch(0.646 0.229 38);
+  --sidebar-primary-foreground: oklch(0.18 0.025 40);
   --sidebar-accent: oklch(0.275 0.011 216.9);
   --sidebar-accent-foreground: oklch(0.987 0.002 197.1);
   --sidebar-border: oklch(1 0 0 / 10%);
@@ -130,4 +131,163 @@
   html {
     @apply font-mono;
   }
+}
+
+/* ----------------------------------------------------------------------------
+   Landing page — Awwwards-style design system additions
+   ------------------------------------------------------------------------- */
+
+/* Custom selection on the canvas */
+.landing-root ::selection {
+  background: #ff4d00;
+  color: #0c0c0e;
+}
+
+/* Keep anchored sections clear of the fixed nav when jumped to */
+.landing-root section[id] {
+  scroll-margin-top: 4.5rem;
+}
+
+/* Animated film grain overlay */
+@keyframes grain-shift {
+  0% { transform: translate(0, 0); }
+  10% { transform: translate(-5%, -10%); }
+  20% { transform: translate(-15%, 5%); }
+  30% { transform: translate(7%, -25%); }
+  40% { transform: translate(-5%, 25%); }
+  50% { transform: translate(-15%, 10%); }
+  60% { transform: translate(15%, 0%); }
+  70% { transform: translate(0%, 15%); }
+  80% { transform: translate(3%, 35%); }
+  90% { transform: translate(-10%, 10%); }
+  100% { transform: translate(0, 0); }
+}
+.animate-grain {
+  animation: grain-shift 1.2s steps(6) infinite;
+}
+
+/* Scroll-cue indicator bar */
+@keyframes scrollcue {
+  0% { transform: translateY(-100%); }
+  100% { transform: translateY(200%); }
+}
+
+/* Clip-mask line reveal: child slides up from behind a hidden parent */
+.line-mask {
+  display: block;
+  overflow: hidden;
+}
+.line-mask > * {
+  display: block;
+  will-change: transform;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .animate-grain {
+    animation: none;
+  }
+}
+
+/* Lenis smooth scroll recommended styles */
+html.lenis,
+html.lenis body {
+  height: auto;
+}
+.lenis.lenis-smooth {
+  scroll-behavior: auto !important;
+}
+.lenis.lenis-smooth [data-lenis-prevent] {
+  overscroll-behavior: contain;
+}
+.lenis.lenis-stopped {
+  overflow: hidden;
+}
+
+/* ----------------------------------------------------------------------------
+   Modern dark SaaS design system (landing only) — CodeRabbit-style
+   Deep near-black canvas, orange accent, rounded glass cards, soft glows.
+   ------------------------------------------------------------------------- */
+.landing-root {
+  --bg: #0a0a0c;
+  --surface: #111114;
+  --line: rgba(255, 255, 255, 0.08);
+  --line-strong: rgba(255, 255, 255, 0.16);
+  --accent: #ff4d00;
+  --accent-2: #ff7a3d;
+  --txt: #e9e9ec;
+  --txt-dim: #9a9aa3;
+  background: var(--bg);
+  color: var(--txt);
+}
+
+/* Glass card surface */
+.card {
+  background: rgba(255, 255, 255, 0.025);
+  border: 1px solid var(--line);
+  border-radius: 18px;
+  backdrop-filter: blur(8px);
+}
+.card-hover {
+  transition: border-color 0.3s ease, background-color 0.3s ease, transform 0.3s ease;
+}
+.card-hover:hover {
+  border-color: var(--line-strong);
+  background: rgba(255, 255, 255, 0.045);
+  transform: translateY(-4px);
+}
+
+/* Primary glow button (orange) */
+.btn-primary {
+  background: linear-gradient(180deg, var(--accent-2), var(--accent));
+  color: #200a00;
+  border-radius: 12px;
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.35),
+    0 0 0 1px rgba(255, 122, 61, 0.35),
+    0 14px 34px -10px rgba(255, 77, 0, 0.6);
+  transition: filter 0.2s ease, box-shadow 0.2s ease, transform 0.1s ease;
+}
+.btn-primary:hover {
+  filter: brightness(1.07);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.4),
+    0 0 0 1px rgba(255, 122, 61, 0.55),
+    0 18px 44px -10px rgba(255, 77, 0, 0.8);
+}
+.btn-primary:active {
+  transform: translateY(1px);
+}
+
+/* Secondary / ghost button */
+.btn-secondary {
+  background: rgba(255, 255, 255, 0.04);
+  color: var(--txt);
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  transition: background-color 0.2s ease, border-color 0.2s ease;
+}
+.btn-secondary:hover {
+  background: rgba(255, 255, 255, 0.08);
+  border-color: var(--line-strong);
+}
+
+/* Pill / badge */
+.pill {
+  border: 1px solid var(--line);
+  background: rgba(255, 255, 255, 0.03);
+  border-radius: 9999px;
+}
+
+/* Gradient accent text */
+.grad-accent {
+  background: linear-gradient(95deg, #ffb07a 0%, var(--accent-2) 40%, var(--accent) 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+/* Hairline divider that fades at the edges */
+.hairline {
+  height: 1px;
+  background: linear-gradient(90deg, transparent, var(--line-strong), transparent);
 }

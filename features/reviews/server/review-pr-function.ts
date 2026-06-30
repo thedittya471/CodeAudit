@@ -1,6 +1,6 @@
 import { inngest } from "@/features/inngest/client";
 import { prisma } from "@/lib/db";
-import { formatPrFilesForReview, getPullRequestFiles } from "./pr-files";
+import { getPullRequestFiles } from "./pr-files";
 import { generateReview } from "./generate-review";
 import { postPrComment, updatePrComment, buildReviewBody, REVIEW_IN_PROGRESS_BODY, REVIEW_MARKER } from "./post-pr-comment";
 import { startCheckRun, completeCheckRun } from "./check-run";

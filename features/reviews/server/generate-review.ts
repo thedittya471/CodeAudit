@@ -1,7 +1,7 @@
 import { generateText } from "ai";
 import { openrouter } from "@/features/ai"
 
-const REVIEW_MODEL = "openrouter/free"
+const REVIEW_MODEL = "qwen/qwen3-coder:free"
 
 const SYSTEM_PROMPT = `You are an expert code reviewer with deep knowledge of software engineering best practices, security, and performance optimization.
 
@@ -74,6 +74,7 @@ export async function generateReview(input: ReviewInput) {
     const { text } = await generateText({
         model: openrouter(REVIEW_MODEL),
         system: SYSTEM_PROMPT,
+        maxOutputTokens: 2000,
         prompt: `Repository: ${input.repoFullName}
   Pull request title: ${input.title}
   
@@ -82,5 +83,15 @@ export async function generateReview(input: ReviewInput) {
   ${context}${repoContextSection}`,
     });
 
-    return text;
+    const review = text.trim();
+
+    // Guard against empty/garbage model responses (e.g. rate-limited free tier)
+    // so we never post a meaningless review. Throwing lets Inngest retry.
+    if (review.length < 20) {
+        throw new Error(
+            `Review model "${REVIEW_MODEL}" returned an empty or too-short response`
+        );
+    }
+
+    return review;
 }

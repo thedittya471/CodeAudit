@@ -13,29 +13,40 @@ export async function startCheckRun(
     installationId: number,
     repoFullName: string,
     headSha: string
-): Promise<number> {
+): Promise<number | null> {
     const app = getGithubApp();
     const octokit = await app.getInstallationOctokit(installationId);
     const [owner, repo] = repoFullName.split("/");
 
-    const { data } = await octokit.request(
-        "POST /repos/{owner}/{repo}/check-runs",
-        {
-            owner,
-            repo,
-            name: CHECK_RUN_NAME,
-            head_sha: headSha,
-            status: "in_progress",
-            started_at: new Date().toISOString(),
-            output: {
-                title: "Review in progress",
-                summary:
-                    "⏳ The AI reviewer is analyzing this pull request. Please wait before merging.",
-            },
-        }
-    );
+    try {
+        const { data } = await octokit.request(
+            "POST /repos/{owner}/{repo}/check-runs",
+            {
+                owner,
+                repo,
+                name: CHECK_RUN_NAME,
+                head_sha: headSha,
+                status: "in_progress",
+                started_at: new Date().toISOString(),
+                output: {
+                    title: "Review in progress",
+                    summary:
+                        "⏳ The AI reviewer is analyzing this pull request. Please wait before merging.",
+                },
+            }
+        );
 
-    return data.id;
+        return data.id;
+    } catch (error: any) {
+        // Most commonly a missing "Checks: write" permission (403). Don't fail
+        // the whole review for this — the PR comment still carries the result.
+        console.warn(
+            "[review] could not create check run (is 'Checks: write' granted?):",
+            error?.status,
+            error?.message
+        );
+        return null;
+    }
 }
 
 type CheckConclusion =
@@ -51,27 +62,40 @@ type CheckConclusion =
 export async function completeCheckRun(
     installationId: number,
     repoFullName: string,
-    checkRunId: number,
+    checkRunId: number | null,
     options: { conclusion: CheckConclusion; title: string; summary: string }
 ) {
+    // No check run was created (e.g. missing permission) — nothing to complete.
+    if (checkRunId === null) {
+        return;
+    }
+
     const app = getGithubApp();
     const octokit = await app.getInstallationOctokit(installationId);
     const [owner, repo] = repoFullName.split("/");
 
-    await octokit.request(
-        "PATCH /repos/{owner}/{repo}/check-runs/{check_run_id}",
-        {
-            owner,
-            repo,
-            check_run_id: checkRunId,
-            status: "completed",
-            conclusion: options.conclusion,
-            completed_at: new Date().toISOString(),
-            output: {
-                title: options.title,
-                // Checks API caps summary at 65535 chars
-                summary: options.summary.slice(0, 65000),
-            },
-        }
-    );
+    try {
+        await octokit.request(
+            "PATCH /repos/{owner}/{repo}/check-runs/{check_run_id}",
+            {
+                owner,
+                repo,
+                check_run_id: checkRunId,
+                status: "completed",
+                conclusion: options.conclusion,
+                completed_at: new Date().toISOString(),
+                output: {
+                    title: options.title,
+                    // Checks API caps summary at 65535 chars
+                    summary: options.summary.slice(0, 65000),
+                },
+            }
+        );
+    } catch (error: any) {
+        console.warn(
+            "[review] could not complete check run:",
+            error?.status,
+            error?.message
+        );
+    }
 }

@@ -9,7 +9,7 @@ function buildSignInCallbackUrl(installationId: string | null): string {
       return `/api/github/callback?installation_id=${installationId}`;
     }
   
-    return DASHBOARD_ROUTES.github;
+    return DASHBOARD_ROUTES.settings;
   }
 
 export async function GET(request: Request) {
@@ -29,5 +29,5 @@ export async function GET(request: Request) {
         await saveInstallation(session.user.id , Number(installationId))
     }
 
-    redirect(DASHBOARD_ROUTES.github)
+    redirect(DASHBOARD_ROUTES.settings)
 }

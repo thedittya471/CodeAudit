@@ -17,13 +17,21 @@ export const metadata: Metadata = {
 
 function ReposNotConnected() {
   return (
-    <div className="flex flex-1 flex-col items-center justify-center gap-4 p-6">
-      <p className="text-sm text-muted-foreground">
-        Install the GitHub App first to see your repositories.
-      </p>
-      <Button nativeButton={false} render={<Link href={DASHBOARD_ROUTES.github} />}>
-        Go to GitHub App
-      </Button>
+    <div className="flex flex-1 flex-col gap-6 p-6">
+      <div className="border border-border">
+        <div className="flex items-center gap-2 border-b border-border px-5 py-3 font-mono text-[10px] uppercase tracking-[0.18em] text-muted-foreground">
+          <span className="size-1.5 rounded-full bg-[#ff4d00]" />
+          Repositories
+        </div>
+        <div className="flex flex-col items-center gap-4 px-6 py-14 text-center">
+          <p className="max-w-sm text-sm text-muted-foreground">
+            Install the GitHub App first to see your repositories.
+          </p>
+          <Button nativeButton={false} render={<Link href={DASHBOARD_ROUTES.settings} />}>
+            Go to Settings
+          </Button>
+        </div>
+      </div>
     </div>
   );
 }

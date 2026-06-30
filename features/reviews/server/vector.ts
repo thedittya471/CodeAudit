@@ -13,11 +13,18 @@ export async function saveChunksToPinecone(
 ) {
     const index = getPineconeIndex();
 
-    const records = chunks.map((chunk) => ({
-        id: chunk.id,
-        text: chunk.text,
-        filePath: chunk.filePath,
-    }));
+    // Defensive: never send empty text to the embedding model.
+    const records = chunks
+        .filter((chunk) => chunk.text.trim().length > 0)
+        .map((chunk) => ({
+            id: chunk.id,
+            text: chunk.text,
+            filePath: chunk.filePath,
+        }));
+
+    if (records.length === 0) {
+        return;
+    }
 
     // namespace() scopes vectors so this PR never mixes with repo-wide sync data
     await index.namespace(namespace).upsertRecords({ records });

@@ -35,16 +35,6 @@ export const githubReposInfiniteQuery = infiniteQueryOptions({
         }
     },
     staleTime: REPOS_STALE_TIME,
-    // While any repo is still pending/syncing, poll so the row flips to
-    // "synced" or "failed" without a manual refresh. Stop polling otherwise.
-    refetchInterval: (query) => {
-        const pages = query.state.data?.pages ?? [];
-        const anySyncing = pages.some((page) =>
-            page.repos.some(
-                (repo) =>
-                    repo.syncStatus === "pending" || repo.syncStatus === "syncing"
-            )
-        );
-        return anySyncing ? 5000 : false;
-    },
+    // Live sync status is handled by the lightweight `repoSyncStatusesQuery`
+    // (DB-only). The repo list itself doesn't need to poll GitHub.
 })

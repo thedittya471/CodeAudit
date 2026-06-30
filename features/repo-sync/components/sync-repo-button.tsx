@@ -3,6 +3,7 @@
 import React from 'react'
 import { useMutation , useQueryClient } from '@tanstack/react-query';
 import { githubRepoKeys } from '@/features/github/lib/repos-query';
+import { repoSyncStatusKeys } from '@/features/github/lib/repo-sync-status-query';
 import { syncRepoCodebase } from '../actions/repo-sync';
 import { Button } from '@/components/ui/button';
 import { RepoSyncStatus } from '../types';
@@ -49,7 +50,8 @@ const SyncRepoButton = ({repoFullName , branch , syncStatus}:SyncRepoButtonProps
         mutationFn:()=>syncRepoCodebase(repoFullName , branch),
         onSuccess:()=>{
             queryClient.invalidateQueries({ queryKey: githubRepoKeys.all });
-            toast.success(`Repo ${repoFullName} synced successfully`);
+            queryClient.invalidateQueries({ queryKey: repoSyncStatusKeys.all });
+            toast.success(`Sync started for ${repoFullName}`);
         },
         onError:(error)=>{
             toast.error(`Failed to sync repo ${repoFullName}: ${error.message}`);

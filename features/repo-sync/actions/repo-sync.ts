@@ -17,7 +17,7 @@ export async function syncRepoCodebase(repoFullName: string, branch: string){
     const installationId = await getUserInstallationId(session.user.id);
 
     if(!installationId){
-        redirect(DASHBOARD_ROUTES.github)
+        redirect(DASHBOARD_ROUTES.settings)
     }
 
 

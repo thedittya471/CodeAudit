@@ -69,6 +69,11 @@ export function buildRepoNamespace(repoFullName: string) {
       for (let start = 0; start < lines.length; start += MAX_CHUNK_LINES) {
         const part = start / MAX_CHUNK_LINES;
         const text = lines.slice(start, start + MAX_CHUNK_LINES).join("\n");
+
+        // The embedding model rejects empty input — skip blank/whitespace chunks.
+        if (!text.trim()) {
+          continue;
+        }
   
         chunks.push({
           id: buildChunkId(file.filePath, part),
@@ -138,16 +143,23 @@ export function buildRepoNamespace(repoFullName: string) {
 
   export async function saveRepoChunks(namespace: string, chunks: CodeChunk[]) {
     const index = getPineconeIndex();
-  
-    for (let start = 0; start < chunks.length; start += UPSERT_BATCH_SIZE) {
-      const batch = chunks.slice(start, start + UPSERT_BATCH_SIZE);
-  
+
+    // Defensive: never send empty text to the embedding model.
+    const valid = chunks.filter((chunk) => chunk.text.trim().length > 0);
+
+    for (let start = 0; start < valid.length; start += UPSERT_BATCH_SIZE) {
+      const batch = valid.slice(start, start + UPSERT_BATCH_SIZE);
+
+      if (batch.length === 0) {
+        continue;
+      }
+
       const records = batch.map((chunk) => ({
         id: chunk.id,
         text: chunk.text,
         filePath: chunk.filePath,
       }));
-  
+
       await index.namespace(namespace).upsertRecords({ records });
     }
   }
@@ -165,6 +177,25 @@ export function buildRepoNamespace(repoFullName: string) {
       statusByRepo[sync.repoFullName] = sync.status;
     }
   
+    return statusByRepo;
+  }
+
+  /**
+   * All repo-sync statuses for an installation, keyed by repo full name.
+   * DB-only (no GitHub call) so it's cheap to poll for live status updates.
+   */
+  export async function getInstallationSyncStatuses(installationId: number) {
+    const syncs = await prisma.repoSync.findMany({
+      where: { installationId },
+      select: { repoFullName: true, status: true },
+    });
+
+    const statusByRepo: Record<string, string> = {};
+
+    for (const sync of syncs) {
+      statusByRepo[sync.repoFullName] = sync.status;
+    }
+
     return statusByRepo;
   }
 
