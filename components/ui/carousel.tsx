@@ -96,6 +96,8 @@ function Carousel({
 
   React.useEffect(() => {
     if (!api) return
+    // Sync button state with the embla carousel (an external system) on mount.
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     onSelect(api)
     api.on("reInit", onSelect)
     api.on("select", onSelect)

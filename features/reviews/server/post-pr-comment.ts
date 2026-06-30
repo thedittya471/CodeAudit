@@ -42,6 +42,30 @@ export async function postPrComment(
 }
 
 /**
+ * Finds our existing review comment on a PR by its hidden marker.
+ * Used by failure recovery, where the original comment id isn't in scope.
+ * Returns the comment id, or null if none was posted yet.
+ */
+export async function findReviewCommentId(
+    installationId: number,
+    repoFullName: string,
+    prNumber: number
+): Promise<number | null> {
+    const app = getGithubApp();
+    const octokit = await app.getInstallationOctokit(installationId);
+    const [owner, repo] = repoFullName.split("/");
+
+    const { data } = await octokit.request(
+        "GET /repos/{owner}/{repo}/issues/{issue_number}/comments",
+        { owner, repo, issue_number: prNumber, per_page: 100 }
+    );
+
+    const comment = data.find((item) => item.body?.includes(REVIEW_MARKER));
+
+    return comment ? comment.id : null;
+}
+
+/**
  * Updates an existing PR comment in place (used to replace the
  * "review in progress" placeholder with the final review).
  */

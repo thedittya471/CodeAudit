@@ -16,7 +16,7 @@ import {
     DropdownMenuTrigger
 } from "@/components/ui/dropdown-menu"
 import { SIGN_IN_PATH } from "../utils"
-import { ChevronsDownIcon, LogOut, LogOutIcon } from "lucide-react"
+import { ChevronsDownIcon, LogOutIcon } from "lucide-react"
 
 const DEFAULT_PLAN = "Free"
 

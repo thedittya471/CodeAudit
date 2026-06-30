@@ -4,6 +4,7 @@ import { getGithubApp } from "@/features/github/utils/github-app";
 import { getPineconeIndex } from "@/features/pinecone/client";
 import { prisma } from "@/lib/db";
 import { inngest } from "@/features/inngest/client";
+import { asRequestError } from "@/lib/errors";
 
 const MAX_FILE_SIZE_BYTES = 100_000;
 const MAX_FILES = 200;
@@ -103,18 +104,19 @@ export function buildRepoNamespace(repoFullName: string) {
         { owner, repo, tree_sha: branch, recursive: "1" }
       );
       tree = response.data;
-    } catch (error: any) {
+    } catch (error: unknown) {
       // GitHub returns 404 (not 403) when the installation token lacks the
       // "Contents: read" permission. The accepted-permissions header tells us
       // exactly what the endpoint requires vs. what the token was granted.
+      const requestError = asRequestError(error);
       console.error("[repo-sync] get-tree failed", {
         owner,
         repo,
         branch,
-        status: error?.status,
-        message: error?.message,
+        status: requestError.status,
+        message: requestError.message,
         acceptedPermissions:
-          error?.response?.headers?.["x-accepted-github-permissions"],
+          requestError.response?.headers?.["x-accepted-github-permissions"],
       });
       throw error;
     }

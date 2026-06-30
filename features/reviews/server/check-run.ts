@@ -1,4 +1,5 @@
 import { getGithubApp } from "@/features/github/utils/github-app";
+import { asRequestError } from "@/lib/errors";
 
 export const CHECK_RUN_NAME = "CodeAudit AI Review";
 
@@ -37,13 +38,14 @@ export async function startCheckRun(
         );
 
         return data.id;
-    } catch (error: any) {
+    } catch (error: unknown) {
         // Most commonly a missing "Checks: write" permission (403). Don't fail
         // the whole review for this — the PR comment still carries the result.
+        const requestError = asRequestError(error);
         console.warn(
             "[review] could not create check run (is 'Checks: write' granted?):",
-            error?.status,
-            error?.message
+            requestError.status,
+            requestError.message
         );
         return null;
     }
@@ -91,11 +93,54 @@ export async function completeCheckRun(
                 },
             }
         );
-    } catch (error: any) {
+    } catch (error: unknown) {
+        const requestError = asRequestError(error);
         console.warn(
             "[review] could not complete check run:",
-            error?.status,
-            error?.message
+            requestError.status,
+            requestError.message
+        );
+    }
+}
+
+/**
+ * Finds an in-progress check run on a commit (by our check name) and marks it
+ * as failed. Used by failure recovery, where the check run id isn't in scope.
+ * Best-effort — never throws.
+ */
+export async function failInProgressCheckRun(
+    installationId: number,
+    repoFullName: string,
+    headSha: string,
+    summary: string
+) {
+    const app = getGithubApp();
+    const octokit = await app.getInstallationOctokit(installationId);
+    const [owner, repo] = repoFullName.split("/");
+
+    try {
+        const { data } = await octokit.request(
+            "GET /repos/{owner}/{repo}/commits/{ref}/check-runs",
+            { owner, repo, ref: headSha, check_name: CHECK_RUN_NAME }
+        );
+
+        const run = data.check_runs.find((item) => item.status !== "completed");
+
+        if (!run) {
+            return;
+        }
+
+        await completeCheckRun(installationId, repoFullName, run.id, {
+            conclusion: "failure",
+            title: "Review failed",
+            summary,
+        });
+    } catch (error: unknown) {
+        const requestError = asRequestError(error);
+        console.warn(
+            "[review] could not fail in-progress check run:",
+            requestError.status,
+            requestError.message
         );
     }
 }

@@ -59,7 +59,7 @@ export function ReviewShowcase() {
             <SectionLabel index="03">The output</SectionLabel>
           </Reveal>
           <h2 className="mt-6 font-sans text-4xl font-semibold leading-[1.05] tracking-tight text-white sm:text-5xl">
-            <MaskLine>A review you'd</MaskLine>
+            <MaskLine>A review you&apos;d</MaskLine>
             <MaskLine index={1}>
               <GradientText>actually read.</GradientText>
             </MaskLine>
@@ -67,7 +67,7 @@ export function ReviewShowcase() {
           <Reveal index={2}>
             <p className="mt-5 max-w-md text-base leading-relaxed text-[#9a9aa3]">
               Structured, proportional, and specific. CodeAudit leads with a
-              one-line verdict, calls out what's good, separates non-blocking
+              one-line verdict, calls out what&apos;s good, separates non-blocking
               suggestions from real issues, and never invents problems on a clean
               diff.
             </p>

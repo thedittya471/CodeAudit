@@ -48,7 +48,7 @@ export function RepoList() {
 
   // Live, DB-only sync statuses (override the value baked into the repo list).
   const { data: syncData } = useQuery(repoSyncStatusesQuery);
-  const liveStatuses = syncData?.statuses ?? {};
+  const liveStatuses = useMemo(() => syncData?.statuses ?? {}, [syncData]);
 
   const loading = isPending && !data;
 

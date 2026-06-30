@@ -8,7 +8,7 @@ import { useGsap, gsap } from "../lib/gsap";
  * Flat — no glows or shadows. Decorative only (aria-hidden, pointer-events-none).
  */
 export function AnimatedBackground() {
-  const scope = useGsap((el) => {
+  const scope = useGsap(() => {
     gsap.to("[data-wash]", {
       yPercent: 24,
       ease: "none",

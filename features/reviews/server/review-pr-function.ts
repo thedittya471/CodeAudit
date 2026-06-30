@@ -2,15 +2,76 @@ import { inngest } from "@/features/inngest/client";
 import { prisma } from "@/lib/db";
 import { getPullRequestFiles } from "./pr-files";
 import { generateReview } from "./generate-review";
-import { postPrComment, updatePrComment, buildReviewBody, REVIEW_IN_PROGRESS_BODY, REVIEW_MARKER } from "./post-pr-comment";
-import { startCheckRun, completeCheckRun } from "./check-run";
+import { postPrComment, updatePrComment, buildReviewBody, findReviewCommentId, REVIEW_IN_PROGRESS_BODY, REVIEW_MARKER } from "./post-pr-comment";
+import { startCheckRun, completeCheckRun, failInProgressCheckRun } from "./check-run";
 import { chunkPrFiles } from "../utils/chunk-code";
 import { buildPrNamespace, saveChunksToPinecone, searchPrContext } from "./vector";
 import { buildRepoNamespace } from "@/features/repo-sync/server/repo-sync";
 
+/** Heuristic: did this failure come from the model provider rate-limiting us? */
+function isRateLimitError(message: string) {
+  return /rate.?limit|429|quota|too many requests/i.test(message);
+}
 
 export const reviewPullRequest = inngest.createFunction(
-    { id: "review-pull-request", triggers: { event: "github/pr.received" } },
+    {
+      id: "review-pull-request",
+      // Free-tier models rate-limit and occasionally return empty responses;
+      // retry a couple of times before giving up.
+      retries: 2,
+      triggers: { event: "github/pr.received" },
+      // If all retries are exhausted, don't leave the PR stuck in "processing"
+      // with a spinning check run and a dangling "in progress" comment.
+      onFailure: async ({ event, error }) => {
+        const pullRequestId = event.data.event.data.pullRequestId as string;
+
+        const pullRequest = await prisma.pullRequest.findUnique({
+          where: { id: pullRequestId },
+        });
+
+        if (!pullRequest) {
+          return;
+        }
+
+        const rateLimited = isRateLimitError(error?.message ?? "");
+        const status = rateLimited ? "rate_limited" : "failed";
+
+        await prisma.pullRequest.update({
+          where: { id: pullRequestId },
+          data: { status },
+        });
+
+        const failureBody = rateLimited
+          ? `${REVIEW_MARKER}\n## 🔍 AI Code Review\n\n⚠️ The review couldn't be completed because the AI provider is currently rate-limited. It will retry on the next push to this pull request.`
+          : `${REVIEW_MARKER}\n## 🔍 AI Code Review\n\n❌ The automated review failed unexpectedly. Push a new commit to retry.`;
+
+        // Best-effort cleanup of the placeholder comment and check run so the
+        // PR doesn't look like a review is still running.
+        const commentId = await findReviewCommentId(
+          pullRequest.installationId,
+          pullRequest.repoFullName,
+          pullRequest.prNumber
+        );
+
+        if (commentId !== null) {
+          await updatePrComment(
+            pullRequest.installationId,
+            pullRequest.repoFullName,
+            commentId,
+            failureBody
+          );
+        }
+
+        await failInProgressCheckRun(
+          pullRequest.installationId,
+          pullRequest.repoFullName,
+          pullRequest.headSha,
+          rateLimited
+            ? "The AI provider is rate-limited. The review will retry on the next push."
+            : "The automated review failed unexpectedly."
+        );
+      },
+    },
     async ({ event, step }) => {
       const pullRequestId = event.data.pullRequestId;
   

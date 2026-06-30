@@ -28,6 +28,8 @@ function prStatusMeta(status: string): StatusMeta {
       return { tone: "warning", label: "Pending", dot: "bg-amber-500 animate-pulse" };
     case "rate_limited":
       return { tone: "danger", label: "Rate limited", dot: "bg-red-500" };
+    case "failed":
+      return { tone: "danger", label: "Failed", dot: "bg-red-500" };
     default:
       return { tone: "neutral", label: status, dot: "bg-muted-foreground" };
   }

@@ -1,9 +1,7 @@
-import { getServerSession } from "@/features/auth/actions";
-import { DASHBOARD_ROUTES } from "@/features/dashboard/lib/routes";
 import type { GithubInstallationStatus } from "@/features/dashboard/lib/types";
 import { getGithubApp } from "@/features/github/utils/github-app";
 import { prisma } from "@/lib/db";
-import { redirect } from "next/navigation";
+import { asRequestError } from "@/lib/errors";
 
 
 function getAccountLogin(
@@ -90,8 +88,8 @@ export async function uninstallGithubApp(installationId: number) {
         await app.octokit.request("DELETE /app/installations/{installation_id}", {
             installation_id: installationId,
         });
-    } catch (error: any) {
-        if (error?.status === 404) {
+    } catch (error: unknown) {
+        if (asRequestError(error).status === 404) {
             return;
         }
         throw error;

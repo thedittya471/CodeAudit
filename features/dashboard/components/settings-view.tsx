@@ -88,6 +88,9 @@ export function SettingsView({
   const [mounted, setMounted] = useState(false);
   const [signingOut, setSigningOut] = useState(false);
 
+  // Defer theme-dependent UI until after mount to avoid hydration mismatch
+  // (next-themes only knows the resolved theme on the client).
+  // eslint-disable-next-line react-hooks/set-state-in-effect
   useEffect(() => setMounted(true), []);
 
   const installedLabel = installation.installedAt
